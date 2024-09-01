@@ -6,40 +6,37 @@ import VideoSearch from '../components/videos/VideoSearch'
 import { fetchFromAPI } from '../utils/api'
 
 const Search = () => {
-    const { searchId } = useParams(); // URL에서 searchId 파라미터를 추출
-    const [ videos, setVideos ] = useState([]); //videos 상태는 비디오 목록을 저장
-    const [ nextPageToken, setNextPageToken ] = useState(null); //다음 페이지의 데이터를 가져오기 위해 필요한 토큰을 저장
+    const { searchId } = useParams();
+    const [ videos, setVideos ] = useState([]);
+    const [ nextPageToken, setNextPageToken ] = useState(null);
     const [ loading, setLoading ] = useState(true); 
     
     useEffect(() => {
-        setVideos([]); //videos를 빈배열로 초기화
-        fetchVideos(searchId); //함수를 호출해 새로운 데이터 가져옴
+        setVideos([]);
+        fetchVideos(searchId);
         setLoading(true);
     }, [searchId]);
 
-
-    const fetchVideos = (query, pagetoken = '') => { //query는 검색어이고, pageToken은 페이지네이션을 위한 토큰
-        fetchFromAPI(`search?part=snippet&${query}=${pagetoken}`)
-            .then((data) =>{
-                setNextPageToken(data.nextPageToken); //data.nextPageToken을 nextPageToken 상태에 저장
-                setVideos((prevVideos)=> [...prevVideos, ...data.items]); //(prevVideos)에 새로 가져온 비디오(data.items)를 추가
+    const fetchVideos = (query, pageToken = '') => {
+        fetchFromAPI(`search?part=snippet&q=${query}&pageToken=${pageToken}`)
+            .then((data) => {
+                setNextPageToken(data.nextPageToken);
+                setVideos((prevVideos) => [...prevVideos, ...data.items]);
                 setLoading(false);
             })
-            .catch((error)=>{
-                console.error('Error fetching data:', error); //에러생길때마다 Error fetching data: 문장에 에러표시
-                setLoading(false);
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+                setLoading(false); 
             });
     };
 
-    const handleLoadMore = () =>{
-        if (nextPageToken) { //nextPageToken 가 있으면
-            fetchVideos(searchId, nextPageToken); //fetchVideos실행
+    const handleLoadMore = () => {
+        if (nextPageToken) {
+            fetchVideos(searchId, nextPageToken);
         }
     };
 
-    const searchPageClass = loading ? 'isloading' : 'isloaded';
-
-
+    const searchPageClass = loading ? 'isLoading' : 'isLoaded';
 
     return (
         <Main 
@@ -47,6 +44,7 @@ const Search = () => {
             description="유튜브 검색 결과 페이지입니다.">
             
             <section id='searchPage' className={searchPageClass}>
+                <h2>🤠 <em>{searchId}</em> 검색 결과입니다.</h2>
                 <div className="video__inner search">
                     <VideoSearch videos={videos} />
                 </div>
